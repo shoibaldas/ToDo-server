@@ -61,6 +61,42 @@ app.get("/employees", async (req, res) => {
   }
 });
 
+app.post("/tasks", async (req, res) => {
+  try {
+    const task = req.body;
+    const result = await allTask.insertOne(task);
+    if (result) {
+      res.send({
+        success: true,
+        message: "Successfully Added.",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.get("/tasks", async (req, res) => {
+  try {
+    const cursor = allTask.find({});
+    const tasks = await cursor.toArray();
+
+    res.send({
+      success: true,
+      message: "Data fetched successfully.",
+      data: tasks,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 app.get("/", async (req, res) => {
   res.send("ToDo API is running");
 });
