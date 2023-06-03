@@ -43,6 +43,24 @@ app.post("/employees", async (req, res) => {
   }
 });
 
+app.get("/employees", async (req, res) => {
+  try {
+    const cursor = allEmployee.find({});
+    const employees = await cursor.toArray();
+
+    res.send({
+      success: true,
+      message: "Data fetched successfully.",
+      data: employees,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 app.get("/", async (req, res) => {
   res.send("ToDo API is running");
 });
