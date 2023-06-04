@@ -45,9 +45,7 @@ app.post("/employees", async (req, res) => {
 
 app.get("/employees", async (req, res) => {
   try {
-    const cursor = allEmployee.find({});
-    const employees = await cursor.toArray();
-
+    const employees = await allEmployee.find().toArray();
     res.send({
       success: true,
       message: "Data fetched successfully.",
@@ -61,34 +59,31 @@ app.get("/employees", async (req, res) => {
   }
 });
 
-app.post("/tasks", async (req, res) => {
+app.put("/employees/:id", async (req, res) => {
   try {
-    const task = req.body;
-    const result = await allTask.insertOne(task);
-    if (result) {
+    const employeeId = req.params.id;
+    const task = req.body.task;
+
+    const filter = { _id: new ObjectId(employeeId) };
+    const update = { $set: { task: task } };
+
+    const updatedEmployee = await allEmployee.findOneAndUpdate(
+      filter,
+      update,
+      { returnOriginal: false }
+    );
+
+    if (updatedEmployee) {
       res.send({
         success: true,
-        message: "Successfully Added.",
+        message: "Task added successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
       });
     }
-  } catch (error) {
-    res.send({
-      success: false,
-      error: error.message,
-    });
-  }
-});
-
-app.get("/tasks", async (req, res) => {
-  try {
-    const cursor = allTask.find({});
-    const tasks = await cursor.toArray();
-
-    res.send({
-      success: true,
-      message: "Data fetched successfully.",
-      data: tasks,
-    });
   } catch (error) {
     res.send({
       success: false,
