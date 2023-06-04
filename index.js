@@ -67,13 +67,70 @@ app.put("/employees/:id", async (req, res) => {
     const filter = { _id: new ObjectId(employeeId) };
     const update = { $set: { task: task } };
 
-    const updatedEmployee = await allEmployee.findOneAndUpdate(
-      filter,
-      update,
-      { returnOriginal: false }
-    );
+    const updatedEmployee = await allEmployee.findOneAndUpdate(filter, update, {
+      returnOriginal: false,
+    });
 
     if (updatedEmployee) {
+      res.send({
+        success: true,
+        message: "Task added successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.put("/update/employee/:id", async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const updatedEmployee = req.body;
+
+    delete updatedEmployee._id;
+
+    const filter = { _id: new ObjectId(employeeId) };
+    const update = { $set: updatedEmployee };
+
+    const result = await allEmployee.findOneAndUpdate(filter, update, {
+      returnOriginal: false,
+    });
+
+    if (result) {
+      res.send({
+        success: true,
+        message: "Task added successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/delete/employee/:id", async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const selectedEmployee = { _id: new ObjectId(employeeId) };
+
+    const result = await allEmployee.deleteOne(selectedEmployee);
+
+    if (result) {
       res.send({
         success: true,
         message: "Task added successfully.",
