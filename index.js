@@ -9,8 +9,12 @@ app.use(express.json());
 app.use(cors());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.vrrg6hy.mongodb.net/?retryWrites=true&w=majority`;
-//const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
+// const client = new MongoClient(uri);
 
 async function dbConnect() {
   try {
@@ -65,7 +69,14 @@ app.put("/employees/:id", async (req, res) => {
     const task = req.body.task;
 
     const filter = { _id: new ObjectId(employeeId) };
-    const update = { $set: { task: task } };
+    const update = {
+      $set: {
+        task: {
+          id: task.id,
+          name: task.name,
+        },
+      },
+    };
 
     const updatedEmployee = await allEmployee.findOneAndUpdate(filter, update, {
       returnOriginal: false,
@@ -142,6 +153,104 @@ app.delete("/delete/employee/:id", async (req, res) => {
       });
     }
   } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/delete/task/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const result = await allEmployee.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $unset: { task: "" } },
+      { returnOriginal: false }
+    );
+
+    if (result) {
+      res.send({
+        success: true,
+        message: "Task deleted successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.put("/update/task/:id", async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const task = req.body.task;
+
+    const filter = { _id: new ObjectId(employeeId) };
+    const update = { $set: { task: task } };
+
+    const updatedTask = await allEmployee.findOneAndUpdate(filter, update, {
+      returnOriginal: false,
+    });
+
+    if (updatedTask) {
+      res.send({
+        success: true,
+        message: "Task added successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
+      });
+    }
+  } catch (error) {
+    res.send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.put("/transfer/employee/:id", async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const { task } = req.body;
+
+    console.log("Received request to transfer task:");
+    console.log("Employee ID:", employeeId);
+    console.log("Task data:", task);
+
+    const filter = { _id: new ObjectId(employeeId) };
+    const update = { $set: { task: task } };
+
+    const updatedEmployee = await allEmployee.findOneAndUpdate(filter, update, {
+      returnOriginal: false,
+    });
+
+    console.log("Updated employee:", updatedEmployee);
+
+    if (updatedEmployee) {
+      res.send({
+        success: true,
+        message: "Task transferred successfully.",
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Employee not found.",
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error);
     res.send({
       success: false,
       error: error.message,
