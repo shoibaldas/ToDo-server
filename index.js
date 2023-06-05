@@ -220,35 +220,28 @@ app.put("/update/task/:id", async (req, res) => {
   }
 });
 
-app.put("/transfer/employee/:id", async (req, res) => {
+app.put("/transfer/employee", async (req, res) => {
   try {
-    const employeeId = req.params.id;
-    const { task } = req.body;
+    const updatedTaskList = req.body;
 
-    console.log("Received request to transfer task:");
-    console.log("Employee ID:", employeeId);
-    console.log("Task data:", task);
+    for (const updatedEmployee of updatedTaskList) {
+      const { _id, task } = updatedEmployee;
+      const filter = { _id: new ObjectId(_id) };
+      const update = { $set: { task: task } };
 
-    const filter = { _id: new ObjectId(employeeId) };
-    const update = { $set: { task: task } };
+      const updatedEmployeeResult = await allEmployee.findOneAndUpdate(
+        filter,
+        update,
+        { returnOriginal: false }
+      );
 
-    const updatedEmployee = await allEmployee.findOneAndUpdate(filter, update, {
-      returnOriginal: false,
-    });
-
-    console.log("Updated employee:", updatedEmployee);
-
-    if (updatedEmployee) {
-      res.send({
-        success: true,
-        message: "Task transferred successfully.",
-      });
-    } else {
-      res.send({
-        success: false,
-        message: "Employee not found.",
-      });
+      console.log("Updated employee:", updatedEmployeeResult);
     }
+
+    res.send({
+      success: true,
+      message: "Employee task list updated successfully.",
+    });
   } catch (error) {
     console.error("Error:", error);
     res.send({
