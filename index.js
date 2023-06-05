@@ -27,7 +27,7 @@ async function dbConnect() {
 
 dbConnect();
 const allEmployee = client.db("toDo").collection("employeeList");
-const allTask = client.db("toDo").collection("taskList");
+// const allTask = client.db("toDo").collection("taskList");
 
 app.post("/employees", async (req, res) => {
   try {
